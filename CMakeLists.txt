@@ -37,9 +37,10 @@ file(GLOB SRC_DATA "${DATA_DIR}/*")
 
 
 set(SRC_DAY1 "${SOURCE_DIR}/day1.cpp")
-#set(SRC_DAY2 "${SOURCE_DIR}/day2.cpp")
+set(SRC_DAY2 "${SOURCE_DIR}/day2.cpp" )
 #set(SRC_DAY3 "${SOURCE_DIR}/day3.cpp")
 
 source_group("data"  FILES ${SRC_DATA})
 
 add_executable(day1 ${SRC_DAY1} ${SRC_DATA})
+add_executable(day2 ${SRC_DAY2} ${SRC_DATA})
