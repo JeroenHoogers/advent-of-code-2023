@@ -18,7 +18,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_PROTOTYPES")
 
 if ( CMAKE_COMPILER_IS_GNUCC )
 	# TODO: add -Werror and fix all warnings
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -Wuninitialized -Wpedantic -Wno-unknown-pragmas -Wunused-parameter -fPIC")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -Wuninitialized -Wpedantic -Wno-unknown-pragmas -Wunused-parameter -fPIC -Werror")
   if(CMAKE_BUILD_TYPE MATCHES Debug)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-variable")
   else()
@@ -32,15 +32,16 @@ endif ( MSVC )
 set(SOURCE_DIR src)
 set(DATA_DIR data)
 
-file(GLOB SRC_MAIN "${SOURCE_DIR}/*.cpp")
 file(GLOB SRC_DATA "${DATA_DIR}/*")
 
+file(GLOB SRC_DAY1 "${SOURCE_DIR}/day1.cpp" "${DATA_DIR}/day1*")
+file(GLOB SRC_DAY2 "${SOURCE_DIR}/day2.cpp" "${DATA_DIR}/day2*")
+file(GLOB SRC_DAY3 "${SOURCE_DIR}/day3.cpp" "${DATA_DIR}/day3*")
 
-set(SRC_DAY1 "${SOURCE_DIR}/day1.cpp")
-set(SRC_DAY2 "${SOURCE_DIR}/day2.cpp" )
-#set(SRC_DAY3 "${SOURCE_DIR}/day3.cpp")
+#set(SRC_DAY3 "${SOURCE_DIR}/day3.cpp" "${DATA_DIR}/day3*" )
 
 source_group("data"  FILES ${SRC_DATA})
 
-add_executable(day1 ${SRC_DAY1} ${SRC_DATA})
-add_executable(day2 ${SRC_DAY2} ${SRC_DATA})
+add_executable(day1 ${SRC_DAY1})
+add_executable(day2 ${SRC_DAY2})
+add_executable(day3 ${SRC_DAY3})

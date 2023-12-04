@@ -78,7 +78,7 @@ int main() {
 			// check if this game is possible
 			bool possible = true;
 			int power = 1;
-			for (auto input : input_cubes)
+			for (const auto& input : input_cubes)
 			{
 				power *= max_counts[input.first];
 
