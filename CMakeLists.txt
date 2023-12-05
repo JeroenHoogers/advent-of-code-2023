@@ -38,6 +38,7 @@ file(GLOB SRC_DAY1 "${SOURCE_DIR}/day1.cpp" "${DATA_DIR}/day1*")
 file(GLOB SRC_DAY2 "${SOURCE_DIR}/day2.cpp" "${DATA_DIR}/day2*")
 file(GLOB SRC_DAY3 "${SOURCE_DIR}/day3.cpp" "${DATA_DIR}/day3*")
 file(GLOB SRC_DAY4 "${SOURCE_DIR}/day4.cpp" "${DATA_DIR}/day4*")
+file(GLOB SRC_DAY5 "${SOURCE_DIR}/day5.cpp" "${DATA_DIR}/day5*")
 
 #set(SRC_DAY3 "${SOURCE_DIR}/day3.cpp" "${DATA_DIR}/day3*" )
 
@@ -47,3 +48,4 @@ add_executable(day1 ${SRC_DAY1})
 add_executable(day2 ${SRC_DAY2})
 add_executable(day3 ${SRC_DAY3})
 add_executable(day4 ${SRC_DAY4})
+add_executable(day5 ${SRC_DAY5})
