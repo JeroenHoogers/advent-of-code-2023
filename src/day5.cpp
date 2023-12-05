@@ -3,8 +3,8 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <set>
 #include <unordered_map>
+#include <stack>
 
 namespace fs = std::filesystem;
 
@@ -21,13 +21,15 @@ enum class MapType : int
 	HumidityToLocation		= 7
 };
 
-struct Range {
-	uint64_t src_start;
-	uint64_t dst_start;
+struct Mapping {
+	uint64_t src;
+	uint64_t dst;
 	uint64_t len;
 };
 
-inline uint64_t SeedToLocation(std::unordered_map<MapType, std::vector<Range>>& range_maps, uint64_t seed)
+typedef std::tuple<uint64_t, uint64_t> Range;
+
+inline uint64_t SeedToLocation(std::unordered_map<MapType, std::vector<Mapping>>& range_maps, uint64_t seed)
 {
 	MapType maptype = MapType::SeedToSoil;
 
@@ -42,8 +44,8 @@ inline uint64_t SeedToLocation(std::unordered_map<MapType, std::vector<Range>>& 
 		auto ranges = range_maps[maptype];
 
 		for (const auto& range : ranges) {
-			if (range.src_start <= input && input < range.src_start + range.len) {
-				input = range.dst_start + (input - range.src_start);
+			if (range.src <= input && input < range.src + range.len) {
+				input = range.dst + (input - range.src);
 				break;
 			}
 		}
@@ -56,14 +58,86 @@ inline uint64_t SeedToLocation(std::unordered_map<MapType, std::vector<Range>>& 
 	return input;
 }
 
+inline uint64_t SeedRangeToLocation(std::unordered_map<MapType, std::vector<Mapping>>& range_maps, Range seed_range)
+{
+	MapType maptype = MapType::SeedToSoil;
+
+	std::vector<Range> ranges;
+	ranges.push_back(seed_range);
+
+	//// DEBUG ONLY
+	//const auto& [s, e] = seed_range;
+	//std::cout << "(" << s << ", " << e << ")";
+
+	// apply all mappings
+	for (int i = 1; i < 8; i++)
+	{
+		maptype = (MapType)i;
+		auto mappings = range_maps[maptype];
+
+		std::vector<Range> remapped;
+
+		for (const auto& mapping : mappings) 
+		{
+			uint64_t src_end = mapping.src + mapping.len;
+
+			std::vector<Range> new_ranges;
+
+			while (!ranges.empty())
+			{
+				const auto [start, end] = ranges.back();
+				ranges.pop_back();
+
+				Range before(start, std::min(end, mapping.src));
+				Range intersection(std::max(mapping.src, start), std::min(src_end, end));
+				Range after(std::max(src_end, start), end);
+
+				if (std::get<1>(before) > std::get<0>(before)) {
+					new_ranges.push_back(before);
+				}
+				if (std::get<1>(intersection) > std::get<0>(intersection)) {
+					remapped.push_back(Range(mapping.dst + (std::get<0>(intersection) - mapping.src), mapping.dst + (std::get<1>(intersection) - mapping.src)));
+				}
+				if (std::get<1>(after) > std::get<0>(after)) {
+					new_ranges.push_back(after);
+				}
+			}
+
+			ranges = new_ranges;
+		}
+
+		ranges.insert(ranges.end(), remapped.begin(), remapped.end());
+
+		//// DEBUG ONLY
+		//std::cout << " --> ";
+		//for (const auto& location_ranges : ranges)
+		//{
+		//	const auto [start, end] = location_ranges;
+		//	std::cout << "(" << start << ", " << end << ")";
+		//}
+		//std::cout << std::endl;
+	}
+
+	//std::cout << "results for (" << std::get<0>(seed_range) << ", " << std::get<1>(seed_range) << "): " << std::endl;
+
+	uint64_t min_location = ULONG_MAX;
+	for (const auto& location_ranges : ranges)
+	{
+		const auto [start, end] = location_ranges;
+		//std::cout << "(" << start << ", " << end << ")" << std::endl;
+		min_location = std::min(start, min_location);
+	}
+	return min_location;
+}
+
 int main() {
-	//fs::path input_path("../data/day5_input.txt");
-	fs::path input_path("../data/day5_input_test.txt");
+	fs::path input_path("../data/day5_input.txt");
+	//fs::path input_path("../data/day5_input_test.txt");
 
 	std::ifstream file(input_path);
 
 	std::vector<uint64_t> seeds;
-	std::unordered_map<MapType, std::vector<Range>> mappings;
+	std::unordered_map<MapType, std::vector<Mapping>> mappings;
 
 	if (file.is_open())
 	{
@@ -100,11 +174,11 @@ int main() {
 			std::getline(range_ss, dst_range, ' ');
 			std::getline(range_ss, src_range, ' ');
 			std::getline(range_ss, len, ' ');
-			Range range { stoul(src_range), stoul(dst_range), stoul(len) };
+			Mapping mapping { stoul(src_range), stoul(dst_range), stoul(len) };
 
-			std::cout << line << " [" << (int)current_map << "] (" << range.dst_start << ", " << range.src_start << ", " << range.len << ")" << std::endl;
+			//std::cout << line << " [" << (int)current_map << "] (" << mapping.dst << ", " << mapping.src << ", " << mapping.len << ")" << std::endl;
 
-			mappings[current_map].push_back(range);
+			mappings[current_map].push_back(mapping);
 		}
 	}
 
@@ -121,14 +195,19 @@ int main() {
 
 	for (size_t i = 0; i < seeds.size(); i += 2)
 	{
-		for (uint64_t j = seeds[i]; j < seeds[i] + seeds[i+1]; j++)
-		{
-			uint64_t location = SeedToLocation(mappings, j);//seed_to_location(j);
+		auto range = std::tuple<uint64_t, uint64_t>(seeds[i], seeds[i] + seeds[i+1]);
 
-			lowest_location_p2 = std::min(lowest_location_p2, location);
-		}
+		uint64_t location = SeedRangeToLocation(mappings, range);
+		lowest_location_p2 = std::min(lowest_location_p2, location);
 
-		std::cout << (i + 2) / 2 << "/" << seeds.size() / 2 << std::endl;
+		//for (uint64_t j = seeds[i]; j < seeds[i] + seeds[i+1]; j++)
+		//{
+		//	uint64_t location = SeedToLocation(mappings, j);
+
+		//	lowest_location_p2 = std::min(lowest_location_p2, location);
+		//}
+
+		//std::cout << (i + 2) / 2 << "/" << seeds.size() / 2 << std::endl;
 	}
 
 	std::cout << "The p1 answer is: " << lowest_location_p1 << std::endl;
