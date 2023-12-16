@@ -47,6 +47,7 @@ file(GLOB SRC_DAY10 "${SOURCE_DIR}/day10.cpp" "${DATA_DIR}/day10_*")
 file(GLOB SRC_DAY11 "${SOURCE_DIR}/day11.cpp" "${DATA_DIR}/day11_*")
 file(GLOB SRC_DAY12 "${SOURCE_DIR}/day12.cpp" "${DATA_DIR}/day12_*")
 file(GLOB SRC_DAY13 "${SOURCE_DIR}/day13.cpp" "${DATA_DIR}/day13_*")
+file(GLOB SRC_DAY14 "${SOURCE_DIR}/day14.cpp" "${DATA_DIR}/day14_*")
 
 source_group("data"  FILES ${SRC_DATA})
 
@@ -63,3 +64,4 @@ add_executable(day10 ${SRC_DAY10})
 add_executable(day11 ${SRC_DAY11})
 add_executable(day12 ${SRC_DAY12})
 add_executable(day13 ${SRC_DAY13})
+add_executable(day14 ${SRC_DAY14})
