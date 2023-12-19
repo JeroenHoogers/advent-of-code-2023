@@ -36,7 +36,7 @@ file(GLOB SRC_DATA "${DATA_DIR}/*")
 source_group("data"  FILES ${SRC_DATA})
 
 # Increase this number every day
-set(DAYS 15)
+set(DAYS 16)
 
 foreach(DAY RANGE 1 ${DAYS})
   # Correct ordering with leading zero
